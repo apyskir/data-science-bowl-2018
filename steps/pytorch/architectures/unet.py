@@ -64,15 +64,17 @@ class UNet(nn.Module):
 
     def _up_samples(self):
         up_samples = []
+        kernel_scale = 1
+        stride = self.pool_stride
         for i in range(self.repeat_blocks):
             in_channels = int(self.n_filters * 2 ** (i + 2))
             out_channels = int(self.n_filters * 2 ** (i + 1))
             up_samples.append(nn.ConvTranspose2d(in_channels=in_channels,
                                                  out_channels=out_channels,
-                                                 kernel_size=2,
-                                                 stride=2,
-                                                 padding=0,
-                                                 output_padding=0,
+                                                 kernel_size=kernel_scale*stride,
+                                                 stride=stride,
+                                                 padding=int((kernel_scale-1)*stride/2+0.5),
+                                                 output_padding=((kernel_scale-1)*stride)%2,
                                                  bias=False
                                                  ))
         return nn.ModuleList(up_samples)

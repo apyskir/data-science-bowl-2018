@@ -182,7 +182,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout': params.dropout_conv,
                                                  'in_channels': params.image_channels,
                                                  'n_classifiers': params.dcan_n_classifiers,
-                                                 'upsampling': params.dcan_upsampling
+                                                 'upsampling': params.dcan_upsampling,
+                                                 'dilation': params.dcan_dilation
                                                  },
                                 'optimizer_params': {'lr': params.lr,
                                                      },

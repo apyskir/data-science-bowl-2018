@@ -7,7 +7,8 @@ class UNet(nn.Module):
                  pool_kernel, pool_stride,
                  repeat_blocks, n_filters,
                  batch_norm, dropout,
-                 in_channels, **kwargs):
+                 in_channels, dilation=3,
+                 **kwargs):
         super(UNet, self).__init__()
 
         self.conv_kernel = conv_kernel
@@ -18,6 +19,7 @@ class UNet(nn.Module):
         self.batch_norm = batch_norm
         self.dropout = dropout
         self.in_channels = in_channels
+        self.dilation = dilation
 
         self.input_block = self._input_block()
         self.down_convs = self._down_convs()
@@ -49,6 +51,16 @@ class UNet(nn.Module):
                                             nn.MaxPool2d(kernel_size=(self.pool_kernel, self.pool_kernel),
                                                          stride=self.pool_stride)))
         return nn.ModuleList(down_pools)
+
+    def _pooling_convs(self):
+        pooling_convs = []
+        for i in range(self.repeat_blocks):
+            n_channels = int(self.n_filters * 2 ** (i+1))
+            pooling_convs.append(nn.Conv2d(in_channels=n_channels, out_channels=n_channels,
+                                           kernel_size=self.conv_kernel, stride=self.pool_stride,
+                                           padding=int((self.dilation*(self.conv_kernel-1))/2),
+                                           dilation=self.dilation))
+        return nn.ModuleList(pooling_convs)
 
     def _up_samples(self):
         up_samples = []
@@ -213,14 +225,16 @@ class DCAN(UNet):
                  pool_kernel, pool_stride,
                  repeat_blocks, n_filters,
                  batch_norm, dropout,
-                 in_channels, n_classifiers, upsampling):
+                 in_channels, n_classifiers,
+                 dilation, upsampling):
+
         assert conv_kernel%2==1
         self.n_classifiers = n_classifiers
         super(DCAN, self).__init__(conv_kernel,
                                             pool_kernel, pool_stride,
                                             repeat_blocks, n_filters,
                                             batch_norm, dropout,
-                                            in_channels)
+                                            in_channels, dilation)
 
         self.convs_for_classifiers = self._convs_for_classifiers()
         self.down_pools_for_classifiers = self._down_pools_for_classifiers()
@@ -239,6 +253,8 @@ class DCAN(UNet):
         self.contour_weights = torch.autograd.Variable(torch.randn(self.n_classifiers), requires_grad=True)
         if torch.cuda.is_available():
             self.contour_weights = self.contour_weights.cuda()
+
+        self.down_pools = self._pooling_convs()#test
 
     def _to_single_channel(self):
         in_channels = int(self.n_filters * 2 ** self.repeat_blocks)

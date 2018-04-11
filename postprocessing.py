@@ -138,11 +138,13 @@ def postprocess(image, contour):
     labels = morph.watershed(-good_distance, good_markers, mask=cleaned_mask)
 
     labels = add_dropped_water_blobs(labels, cleaned_mask)
+    labels = connect_small(labels, min_cell_size=20)
+    labels = drop_small(labels, min_size=20)
 
-    min_joinable_size = min_blob_size(image > 0.5, percentile=50, fraction_of_percentile=0.2)
+    min_joinable_size = min_blob_size(labels > 0, percentile=50, fraction_of_percentile=0.2)
     labels = connect_small(labels, min_cell_size=min_joinable_size)
 
-    min_acceptable_size = min_blob_size(image > 0.5, percentile=50, fraction_of_percentile=0.1)
+    min_acceptable_size = min_blob_size(labels > 0, percentile=50, fraction_of_percentile=0.1)
     labels = drop_small(labels, min_size=min_acceptable_size)
 
     labels = drop_big_artifacts(labels, scale=0.01)
@@ -307,7 +309,11 @@ def label(mask):
 
 
 def min_blob_size(mask, percentile=25, fraction_of_percentile=0.1):
-    labels, labels_nr = ndi.label(mask)
+    if len(np.unique(mask))==2:
+        labels, labels_nr = ndi.label(mask)
+    else:
+        labels = mask
+        labels_nr = np.unique(mask).max()
     if labels_nr < 2:
         return 0
     else:

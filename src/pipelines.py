@@ -578,7 +578,7 @@ def postprocessing_borders(model, config, save_output=False):
     category_mapper = Step(name='category_mapper_borders',
                            transformer=make_apply_transformer(
                                      partial(categorize_image,
-                                             activation='sigmoid',
+                                             activation='softmax',
                                              threshold=config.thresholder.threshold_borders
                                              ),
                                      output_name='categorized_images'),

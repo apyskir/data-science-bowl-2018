@@ -31,162 +31,6 @@ def _perspective_transform_augment_images(self, images, random_state, parents, h
 
 iaa.PerspectiveTransform._augment_images = _perspective_transform_augment_images
 
-affine_seq = iaa.Sequential([
-    # General
-    iaa.SomeOf((1, 2),
-               [iaa.Fliplr(0.5),
-                iaa.Flipud(0.5),
-                iaa.Affine(rotate=(0, 360),
-                           translate_percent={"x": (-0.1, 0.1), "y": (-0.1, 0.1)}, mode='symmetric'),
-                iaa.CropAndPad(percent=(-0.25, 0.25), pad_mode='symmetric')
-                ]),
-    # Deformations
-    iaa.Sometimes(0.3, iaa.PiecewiseAffine(scale=(0.02, 0.04))),
-    iaa.Sometimes(0.3, iaa.PerspectiveTransform(scale=(0.05, 0.10))),
-], random_order=True)
-
-color_seq = iaa.Sequential([
-    # Color
-    iaa.Sometimes(0.3, iaa.ContrastNormalization((0.3, 1.0))),
-    iaa.Sometimes(0.3, iaa.ElasticTransformation(alpha=(1, 5), sigma=0.1)),
-    iaa.OneOf([
-        iaa.Noop(),
-        iaa.Sequential([
-            iaa.OneOf([
-                iaa.OneOf([
-                    # Add in HSV or RGB
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(0, iaa.Add((0, 100))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(1, iaa.Add((0, 100))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(2, iaa.Add((0, 100))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.WithChannels(0, iaa.Add((0, 100))),
-                    iaa.WithChannels(1, iaa.Add((0, 100))),
-                    iaa.WithChannels(2, iaa.Add((0, 100)))
-                ]),
-                iaa.OneOf([
-                    # Add elementwise in HSV or RGB
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(0, iaa.AddElementwise((0, 30))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(1, iaa.AddElementwise((0, 30))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(2, iaa.AddElementwise((0, 30))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.WithChannels(0, iaa.AddElementwise((0, 30))),
-                    iaa.WithChannels(1, iaa.AddElementwise((0, 30))),
-                    iaa.WithChannels(2, iaa.AddElementwise((0, 30)))
-                ]),
-                iaa.OneOf([
-                    # Multiply in HSV or RGB
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(0, iaa.Multiply((0, 2))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(1, iaa.Multiply((0, 2))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(2, iaa.Multiply((0, 2))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.WithChannels(0, iaa.Multiply((0, 2))),
-                    iaa.WithChannels(1, iaa.Multiply((0, 2))),
-                    iaa.WithChannels(2, iaa.Multiply((0, 2)))
-                ]),
-                iaa.OneOf([
-                    # Multiply elementwise in HSV or RGB
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(0, iaa.MultiplyElementwise((0, 2))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(1, iaa.MultiplyElementwise((0, 2))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.Sequential([
-                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(2, iaa.MultiplyElementwise((0, 2))),
-                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.WithChannels(0, iaa.MultiplyElementwise((0, 2))),
-                    iaa.WithChannels(1, iaa.MultiplyElementwise((0, 2))),
-                    iaa.WithChannels(2, iaa.MultiplyElementwise((0, 2)))
-                ]),
-            ]),
-            iaa.OneOf([
-                iaa.Noop(),
-                # iaa.CoarseSaltAndPepper(p=(0, 0.1), size_px=(64, 1024), per_channel=True),
-                # iaa.CoarseSaltAndPepper(p=(0, 0.1), size_px=(64, 1024), per_channel=False)
-            ])
-        ]),
-        iaa.OneOf([
-            iaa.GaussianBlur(sigma=(0.4, 8.0)),
-            iaa.AverageBlur(k=(2, 21)),
-            iaa.MedianBlur(k=(3, 15))
-        ]),
-        iaa.OneOf([
-            iaa.Sharpen(alpha=0.5),
-            iaa.Emboss(alpha=(0.0, 1.0), strength=(0.5, 1.5))
-        ])
-    ])
-], random_order=False)
-
-color_seq_grey = iaa.Sequential([
-    # Color
-    iaa.Invert(0.3),
-    iaa.Sometimes(0.3, iaa.ContrastNormalization((0.5, 1.5))),
-    iaa.Sometimes(0.3, iaa.ElasticTransformation(alpha=(1, 5), sigma=0.1)),
-    iaa.OneOf([
-        iaa.Noop(),
-        iaa.Sequential([
-            iaa.OneOf([
-                iaa.Add((0, 100)),
-                iaa.AddElementwise((0, 100)),
-                iaa.Multiply((0, 100)),
-                iaa.MultiplyElementwise((0, 100)),
-            ]),
-            iaa.OneOf([
-                iaa.Noop(),
-                iaa.CoarseSaltAndPepper(p=(0, 0.1), size_px=(64, 1024), per_channel=False)
-            ])
-        ]),
-        iaa.OneOf([
-            iaa.GaussianBlur(sigma=(0.0, 8.0)),
-            iaa.AverageBlur(k=(2, 21)),
-            iaa.MedianBlur(k=(3, 15))
-        ])
-    ])
-], random_order=False)
-
-
-def crop_seq(crop_size):
-    seq = iaa.Sequential([affine_seq,
-                          RandomCropFixedSize(px=crop_size)], random_order=False)
-    return seq
-
-
-def padding_seq(pad_size, pad_method):
-    seq = iaa.Sequential([PadFixed(pad=pad_size, pad_method=pad_method),
-                          ]).to_deterministic()
-    return seq
-
-
-def pad_to_fit_net(divisor, pad_mode, rest_of_augs=iaa.Noop()):
-    return iaa.Sequential(InferencePad(divisor, pad_mode), rest_of_augs)
-
 
 class PadFixed(iaa.Augmenter):
     PAD_FUNCTION = {'reflect': cv2.BORDER_REFLECT_101,
@@ -328,3 +172,184 @@ class InferencePad(iaa.Augmenter):
 
     def get_parameters(self):
         return [self.divisor, self.pad_mode]
+
+
+class ChannelShuffle(iaa.Augmenter):
+    def __init__(self, name=None, deterministic=False, random_state=None):
+        super(ChannelShuffle, self).__init__(name=name, deterministic=deterministic, random_state=random_state)
+
+    def _augment_keypoints(self, keypoints_on_images, random_state, parents, hooks):
+        return keypoints_on_images
+
+    def _augment_images(self, images, random_state, parents, hooks):
+
+        result = []
+        for i, image in enumerate(images):
+            image_shuffled = self._shuffle_channels(image)
+            result.append(image_shuffled)
+        return result
+
+    def _shuffle_channels(self, image):
+        return np.take(image, np.random.permutation(range(image.shape[2])), axis=2)
+
+    def get_parameters(self):
+        return []
+
+
+affine_seq = iaa.Sequential([
+    # General
+    #iaa.Scale((0.5, 1.5)),
+    iaa.SomeOf((1, 2),
+               [iaa.Fliplr(0.5),
+                iaa.Flipud(0.5),
+                iaa.Affine(rotate=(0, 360), mode='symmetric'),
+                ]),
+    # Deformations
+    iaa.Sometimes(0.5, iaa.PiecewiseAffine(scale=(0.02, 0.08))),
+    iaa.Sometimes(0.5, iaa.PerspectiveTransform(scale=(0.10, 0.40))),
+], random_order=True)
+
+color_seq = iaa.Sequential([
+    # Color
+    iaa.Invert(0.3, per_channel=0.5),
+    iaa.Grayscale(alpha=(0,1)),
+    iaa.Sometimes(0.3, iaa.ContrastNormalization((0.3, 1.0))),
+    iaa.Sometimes(0.3, iaa.ElasticTransformation(alpha=(1, 5), sigma=0.1)),
+    ChannelShuffle(),
+    iaa.SomeOf((1,2),[
+        #iaa.Noop(),
+        iaa.Sequential([
+            iaa.SomeOf((1,2),[#test OneOf
+                iaa.SomeOf((1, 2), [
+                    # Add in HSV or RGB
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(0, iaa.Add((20, 100))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(1, iaa.Add((20, 100))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(2, iaa.Add((20, 100))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.WithChannels(0, iaa.Add((20, 100))),
+                    iaa.WithChannels(1, iaa.Add((20, 100))),
+                    iaa.WithChannels(2, iaa.Add((20, 100)))
+                ]),
+                iaa.SomeOf((1, 2), [
+                    # Add elementwise in HSV or RGB
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(0, iaa.AddElementwise((10, 30))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(1, iaa.AddElementwise((10, 30))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(2, iaa.AddElementwise((10, 30))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.WithChannels(0, iaa.AddElementwise((10, 30))),
+                    iaa.WithChannels(1, iaa.AddElementwise((10, 30))),
+                    iaa.WithChannels(2, iaa.AddElementwise((10, 30)))
+                ]),
+                iaa.SomeOf((1, 2), [
+                    # Multiply in HSV or RGB
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(0, iaa.Multiply((0, 2))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(1, iaa.Multiply((0, 2))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(2, iaa.Multiply((0, 2))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.WithChannels(0, iaa.Multiply((0, 2))),
+                    iaa.WithChannels(1, iaa.Multiply((0, 2))),
+                    iaa.WithChannels(2, iaa.Multiply((0, 2)))
+                ]),
+                iaa.SomeOf((1, 2), [
+                    # Multiply elementwise in HSV or RGB
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(0, iaa.MultiplyElementwise((0, 2))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(1, iaa.MultiplyElementwise((0, 2))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.Sequential([
+                        iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
+                        iaa.WithChannels(2, iaa.MultiplyElementwise((0, 2))),
+                        iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
+                    iaa.WithChannels(0, iaa.MultiplyElementwise((0, 2))),
+                    iaa.WithChannels(1, iaa.MultiplyElementwise((0, 2))),
+                    iaa.WithChannels(2, iaa.MultiplyElementwise((0, 2)))
+                ]),
+            ]),
+            iaa.OneOf([
+                iaa.Noop(),
+                # iaa.CoarseSaltAndPepper(p=(0, 0.1), size_px=(64, 1024), per_channel=True),
+                # iaa.CoarseSaltAndPepper(p=(0, 0.1), size_px=(64, 1024), per_channel=False)
+            ])
+        ]),
+        iaa.OneOf([
+            iaa.GaussianBlur(sigma=(0.4, 4.0)),
+            iaa.AverageBlur(k=(2, 12)),
+            iaa.MedianBlur(k=(3, 15))
+        ]),
+        iaa.OneOf([
+            iaa.Sharpen(alpha=0.5),
+            iaa.Emboss(alpha=(0.0, 1.0), strength=(0.5, 1.5))
+        ])
+    ])
+], random_order=False)
+
+color_seq_grey = iaa.Sequential([
+    # Color
+    iaa.Invert(0.3),
+    iaa.Sometimes(0.3, iaa.ContrastNormalization((0.5, 1.5))),
+    iaa.Sometimes(0.3, iaa.ElasticTransformation(alpha=(1, 5), sigma=0.1)),
+    iaa.OneOf([
+        iaa.Noop(),
+        iaa.Sequential([
+            iaa.OneOf([
+                iaa.Add((0, 100)),
+                iaa.AddElementwise((0, 100)),
+                iaa.Multiply((0, 100)),
+                iaa.MultiplyElementwise((0, 100)),
+            ]),
+            iaa.OneOf([
+                iaa.Noop(),
+                iaa.CoarseSaltAndPepper(p=(0, 0.1), size_px=(64, 1024), per_channel=False)
+            ])
+        ]),
+        iaa.OneOf([
+            iaa.GaussianBlur(sigma=(0.0, 8.0)),
+            iaa.AverageBlur(k=(2, 21)),
+            iaa.MedianBlur(k=(3, 15))
+        ])
+    ])
+], random_order=False)
+
+
+def crop_seq(crop_size):
+    seq = iaa.Sequential([affine_seq,
+                          RandomCropFixedSize(px=crop_size)], random_order=False)
+    return seq
+
+
+def padding_seq(pad_size, pad_method):
+    seq = iaa.Sequential([PadFixed(pad=pad_size, pad_method=pad_method),
+                          ]).to_deterministic()
+    return seq
+
+
+def pad_to_fit_net(divisor, pad_mode, rest_of_augs=iaa.Noop()):
+    return iaa.Sequential([InferencePad(divisor, pad_mode), rest_of_augs])

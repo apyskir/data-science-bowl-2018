@@ -205,16 +205,16 @@ affine_seq = iaa.Sequential([
                 iaa.Affine(rotate=(0, 360), mode='symmetric'),
                 ]),
     # Deformations
-    iaa.Sometimes(0.5, iaa.PiecewiseAffine(scale=(0.02, 0.08))),
+    iaa.Sometimes(0.5, iaa.PiecewiseAffine(scale=(0.02, 0.1))),
     iaa.Sometimes(0.5, iaa.PerspectiveTransform(scale=(0.10, 0.40))),
 ], random_order=True)
 
 color_seq = iaa.Sequential([
     # Color
-    iaa.Invert(0.3, per_channel=0.5),
+    iaa.Invert(0.5, per_channel=0.5),
     iaa.Grayscale(alpha=(0,1)),
-    iaa.Sometimes(0.3, iaa.ContrastNormalization((0.3, 1.0))),
-    iaa.Sometimes(0.3, iaa.ElasticTransformation(alpha=(1, 5), sigma=0.1)),
+    iaa.Sometimes(0.5, iaa.ContrastNormalization((0.3, 1.0))),
+    iaa.Sometimes(0.5, iaa.ElasticTransformation(alpha=(1, 5), sigma=0.1)),
     ChannelShuffle(),
     iaa.SomeOf((1,2),[
         #iaa.Noop(),
@@ -260,37 +260,37 @@ color_seq = iaa.Sequential([
                     # Multiply in HSV or RGB
                     iaa.Sequential([
                         iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(0, iaa.Multiply((0, 2))),
+                        iaa.WithChannels(0, iaa.Multiply((1.2, 2))),
                         iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
                     iaa.Sequential([
                         iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(1, iaa.Multiply((0, 2))),
+                        iaa.WithChannels(1, iaa.Multiply((1.2, 2))),
                         iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
                     iaa.Sequential([
                         iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(2, iaa.Multiply((0, 2))),
+                        iaa.WithChannels(2, iaa.Multiply((1.2, 2))),
                         iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.WithChannels(0, iaa.Multiply((0, 2))),
-                    iaa.WithChannels(1, iaa.Multiply((0, 2))),
-                    iaa.WithChannels(2, iaa.Multiply((0, 2)))
+                    iaa.WithChannels(0, iaa.Multiply((1.2, 2))),
+                    iaa.WithChannels(1, iaa.Multiply((1.2, 2))),
+                    iaa.WithChannels(2, iaa.Multiply((1.2, 2)))
                 ]),
                 iaa.SomeOf((1, 2), [
                     # Multiply elementwise in HSV or RGB
                     iaa.Sequential([
                         iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(0, iaa.MultiplyElementwise((0, 2))),
+                        iaa.WithChannels(0, iaa.MultiplyElementwise((1.2, 2))),
                         iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
                     iaa.Sequential([
                         iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(1, iaa.MultiplyElementwise((0, 2))),
+                        iaa.WithChannels(1, iaa.MultiplyElementwise((1.2, 2))),
                         iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
                     iaa.Sequential([
                         iaa.ChangeColorspace(from_colorspace="RGB", to_colorspace="HSV"),
-                        iaa.WithChannels(2, iaa.MultiplyElementwise((0, 2))),
+                        iaa.WithChannels(2, iaa.MultiplyElementwise((1.2, 2))),
                         iaa.ChangeColorspace(from_colorspace="HSV", to_colorspace="RGB")]),
-                    iaa.WithChannels(0, iaa.MultiplyElementwise((0, 2))),
-                    iaa.WithChannels(1, iaa.MultiplyElementwise((0, 2))),
-                    iaa.WithChannels(2, iaa.MultiplyElementwise((0, 2)))
+                    iaa.WithChannels(0, iaa.MultiplyElementwise((1.2, 2))),
+                    iaa.WithChannels(1, iaa.MultiplyElementwise((1.2, 2))),
+                    iaa.WithChannels(2, iaa.MultiplyElementwise((1.2, 2)))
                 ]),
             ]),
             iaa.OneOf([
@@ -322,8 +322,8 @@ color_seq_grey = iaa.Sequential([
             iaa.OneOf([
                 iaa.Add((0, 100)),
                 iaa.AddElementwise((0, 100)),
-                iaa.Multiply((0, 100)),
-                iaa.MultiplyElementwise((0, 100)),
+                iaa.Multiply((1.2, 100)),
+                iaa.MultiplyElementwise((1.2, 100)),
             ]),
             iaa.OneOf([
                 iaa.Noop(),
